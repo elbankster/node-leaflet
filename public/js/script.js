@@ -128,14 +128,11 @@ async function addUserLocation(e) {
     
 }
 
-async function updateLocationDetails(marker, location) {
+async function showLocationDetails(location) {
 
-    const currentConditions = await getGaugeDetails(location.gauge_id);
+    console.log('location passed:');
+    console.log(location);
 
-    const popupContent = generatePopupContent(location, currentConditions);
-
-    marker.bindPopup(popupContent);
-    
     const locationDetails = document.getElementById('location-details');
 
     // Update the Location Details section
@@ -160,8 +157,7 @@ async function updateLocationDetails(marker, location) {
 }
 
 async function getGaugeDetails(gaugeId) {
-    console.log('going into getGaugeDetails passing' + gaugeId);
-    console.log(gaugeId);
+    
     try {
         // Fetch the XML file
         const response = await fetch('./current_conditions.kml');
@@ -203,8 +199,6 @@ async function getGaugeDetails(gaugeId) {
                         details.currentCondition = dataValue;
                     }
                 }
-
-                console.log('Gauge details: ' + details);
                 
                 return details;
             }
@@ -215,10 +209,17 @@ async function getGaugeDetails(gaugeId) {
         console.error('Error fetching or parsing XML:', error);
         return null;
     }
-    console.log('exiting getGaugeDetails');
 }
 
 const markers = {};
+
+async function addPopup(marker, location) {
+    const currentConditions = await getGaugeDetails(location.gauge_id);
+
+    const popupContent = generatePopupContent(location, currentConditions);
+
+    marker.bindPopup(popupContent);
+}
 
 async function loadUserLocations() {
     try {
@@ -253,7 +254,8 @@ async function loadUserLocations() {
 
             // Add a click event to the marker to update the location details
             marker.on('click',() => { 
-                updateLocationDetails(marker, location); 
+                showLocationDetails(location); 
+                addPopup(marker, location);
                 populateTripsForLocation(location.id);
             });
 
@@ -267,14 +269,15 @@ async function loadUserLocations() {
             listItem.addEventListener('click', () => {
                 map.setView([location.lat, location.lon], 12);
 
-                updateLocationDetails(marker, location);                        
+                showLocationDetails(location);                        
                 
+                addPopup(marker, location);
+
                 marker.openPopup();
 
                 // Populate the "Trips Starting From This Location" table
                 populateTripsForLocation(location.id);
             });
-
 
             marker.bindPopup(popupContent);
 
@@ -447,13 +450,17 @@ async function populateTripsTable() {
                 <td>${trip.end_location?.name || 'Unknown'}</td>
             `;
 
-        // Add click event to show trip details
-        newRow.addEventListener('click', () => {
-            showTripDetails(trip);
-            
-            // add function to populate location details and trips from this location when clicked.
-            populateTripsForLocation(trip.start_location?.id);
-        });
+            // Add click event to show trip details
+            newRow.addEventListener('click', async () => {
+                try {
+                    const location = await getLocationFromLocationId(trip.start_location?.id); 
+                    showTripDetails(trip);
+                    showLocationDetails(location);
+                    populateTripsForLocation(trip.start_location?.id);
+                } catch (error) {
+                    console.error("Error resolving location:", error);
+                }
+            });
 
             tripsTable.appendChild(newRow);
         });
@@ -465,15 +472,11 @@ async function populateTripsTable() {
 populateTripsTable();
 
 async function showTripDetails(trip) {
-    console.log('trip:')
-    console.log(trip);
-
+    
     const tripDetails = document.getElementById('trip-details');
 
     // Open the popup for the starting location
-    const tripGaugeId = await getGaugeIdFromLocationId(trip.start_location.id);
-    const waterway = await getWaterwayFromLocationId(trip.start_location.id);
-    const startLocation = await getLocationNameFromLocationId(trip.start_location.id);
+    const location = await getLocationFromLocationId(trip.start_location.id);
     const endLocation = await getLocationNameFromLocationId(trip.end_location.id);   
 
     tripDetails.innerHTML = `
@@ -482,10 +485,10 @@ async function showTripDetails(trip) {
         <div id="trip-data">
             <p><strong>Date:</strong> ${trip.started ? new Date(trip.started).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}</p>
             
-            <p><strong>Put in:</strong> ${startLocation}</p> 
+            <p><strong>Put in:</strong> ${trip.start_location?.name}</p> 
             <p><strong>Time:</strong> ${trip.started ? new Date(trip.started).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
 
-            <p><strong>Take out:</strong> ${endLocation}</p> 
+            <p><strong>Take out:</strong> ${trip.end_location?.name}</p> 
             <strong>End:</strong> ${trip.ended ? new Date(trip.ended).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : 'N/A'}</p>
             
             <p><strong>Distance:</strong> ${trip.distance ? `${trip.distance} km` : 'N/A'}</p>
@@ -494,64 +497,54 @@ async function showTripDetails(trip) {
         </div>
     `;
 
-    if (tripGaugeId) {
-        // Fetch current conditions for the gauge
-        const currentConditions = await getGaugeDetails(tripGaugeId);
-        console.log("currentConditions:", currentConditions);
-
+    if (location.gauge_id) {
+        
         // Check if marker exists and bind the popup
         if (trip.start_location && markers[trip.start_location.id]) {
-            const currentConditions = await getGaugeDetails(tripGaugeId);
-
-            let location = {
-                name: startLocation,
-                waterway: waterway
-            };
+            const currentConditions = await getGaugeDetails(location.gauge_id);
 
             const popupContent = generatePopupContent(location, currentConditions);
-            
-            console.log(popupContent);
-            //marker.bindPopup(popupContent);
+        
             markers[trip.start_location.id].bindPopup(popupContent).openPopup();
         }
     } else {
         const popupContent =  `
                 <h2>${trip.start_location.name}</h2>
-                <h3>${waterway}</h3>
+                <h3>${location.waterway}</h3>
             `;
         markers[trip.start_location.id].bindPopup(popupContent).openPopup();
         console.error('Gauge ID not found for the location.');
     }
 }
 
-async function getWaterwayFromLocationId(locationId) {
-    console.log('getting waterway from location id' + locationId);
+async function getLocationFromLocationId(locationId) {
+    
     try {
         const { data, error } = await supabase
             .from('user_location') // Replace with your actual table name
-            .select('waterway') // Select only the gauge_id column
+            .select('*') // Select only the gauge_id column
             .eq('id', locationId) // Match the location ID
             .single(); // Since locationId is unique, this ensures a single result
 
         if (error) {
-            console.error('Error fetching waterway:', error);
+            console.error('Error fetching location:', error);
             return null;
         }
 
-        if (data && data.waterway) {
-            return data.waterway;
+        if (data && data.name) {
+            return data;
         } else {
-            console.error('Waterway not found for location ID:', locationId);
+            console.error('Location not found for location ID:', locationId);
             return null;
         }
     } catch (err) {
-        console.error('Unexpected error while fetching Waterway:', err);
+        console.error('Unexpected error while fetching location:', err);
         return null;
-    }            
+    }        
 }
 
 async function getLocationNameFromLocationId(locationId) {
-    console.log('getting location name from location id' + locationId);
+    
     try {
         const { data, error } = await supabase
             .from('user_location') // Replace with your actual table name
@@ -576,35 +569,8 @@ async function getLocationNameFromLocationId(locationId) {
     }            
 }
 
-async function getGaugeIdFromLocationId(locationId) {
-    console.log('getting gauge id from location id' + locationId);
-    try {
-        const { data, error } = await supabase
-            .from('user_location') // Replace with your actual table name
-            .select('gauge_id') // Select only the gauge_id column
-            .eq('id', locationId) // Match the location ID
-            .single(); // Since locationId is unique, this ensures a single result
-
-        if (error) {
-            console.error('Error fetching gauge ID:', error);
-            return null;
-        }
-
-        if (data && data.gauge_id) {
-            return data.gauge_id;
-        } else {
-            console.error('Gauge ID not found for location ID:', locationId);
-            return null;
-        }
-    } catch (err) {
-        console.error('Unexpected error while fetching gauge ID:', err);
-        return null;
-    }
-}
-
 async function populateTripsForLocation(locationId) {
-    console.log('populating trips from location' + locationId);
-
+    
     try {
         // Query trips starting from the selected location
         const { data, error } = await supabase
@@ -659,7 +625,7 @@ function generatePopupContent(location, currentConditions) {
         <h2>${location.name}</h2>
         <h3>${location.waterway}</h3>
         
-        <p class="flow">Flow (m³/s)<br><span class="flow">${currentConditions.flow}</span><br>
+        <p class="flow">Current flow (m³/s)<br><span class="flow">${currentConditions.flow}</span><br>
         Level: <strong>${currentConditions.stage} m</strong></p>
         <p>${currentConditions.currentCondition}</p>
         <p class="smaller">Recorded ${currentConditions.date} ${currentConditions.time}</p>
