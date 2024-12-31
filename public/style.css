@@ -61,13 +61,9 @@ table.trips {
 #tripslog h3 { 
     margin: 20px auto 10px auto;
     padding:0 auto; 
-    text-align: center; 
     background: #ddd; 
     color: #333; 
-    padding: 3px;
-    font-size:0.8em;
-    text-transform:uppercase;
-    letter-spacing: 0.2em;
+    padding: 8px;
 }
 
 table.starting-trip { 
@@ -112,3 +108,17 @@ fieldset {
 }
 
 .hidden { display: none; }
+
+h4 {
+    padding:0;
+    margin:0;
+}
+
+span.flow { 
+    font-size:4em;
+    font-weight:bold;
+}
+
+.flow { text-align: center; }
+
+.smaller { font-size: .8em; }
