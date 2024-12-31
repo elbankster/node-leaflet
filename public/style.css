@@ -1,0 +1,114 @@
+* { margin:0; padding:0; }
+
+body {
+    font-family:sans-serif;
+    display: flex;
+    height: 100vh;
+}
+
+#left {
+    width: 25%;
+    background-color: #f4f4f4;
+    overflow-y: auto;
+    border-right: 1px dotted gray;
+}
+
+#center {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+#right {
+    width: 25%;
+    background-color: #f4f4f4;
+    overflow-y: auto;
+    border-left: 1px dotted gray;
+}
+
+#map {
+    flex-grow: 1;
+}
+
+h1, h2 {
+    background: #ddd;
+    padding:5px;
+    margin:5px 0;
+
+}
+
+#location-details h2, #trip-details h2 {
+    margin-top: 20px;
+    background: #555;
+    color: #eee;
+}
+
+li { cursor: pointer; }
+
+.trips {
+    padding: 10px;
+    margin: 10px;
+    font-size:0.9em;    
+}
+
+table.trips {
+    text-align:center;
+    padding: 0 auto;
+    margin: 0 auto;
+    width:99%;
+}
+
+#tripslog h3 { 
+    margin: 20px auto 10px auto;
+    padding:0 auto; 
+    text-align: center; 
+    background: #ddd; 
+    color: #333; 
+    padding: 3px;
+    font-size:0.8em;
+    text-transform:uppercase;
+    letter-spacing: 0.2em;
+}
+
+table.starting-trip { 
+    text-align: center;
+    width:100%;
+}
+
+#add-trip-btn {
+    padding:5px;
+    margin: 10px;
+}
+
+#trip-form {
+    padding:10px;
+}
+
+fieldset {
+    padding:10px;
+}
+
+.form-group {
+    padding-bottom:10px;
+}
+
+.trips th {background:#888; color:#fff;}
+
+.trips td { cursor: pointer; padding:2px; }
+
+#user-locations-list {
+    padding: 5px;
+    margin: 5px;
+    font-size:0.9em;  
+    text-decoration: none;
+    list-style-type: none;  
+}
+#user-locations-list li {
+    padding:2px;
+}
+
+#location-details p {
+    padding:5px;
+}
+
+.hidden { display: none; }

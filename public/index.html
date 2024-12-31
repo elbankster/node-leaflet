@@ -1,0 +1,130 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <base target="_top">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>Leaflet</title>
+        
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+        <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+        <link rel="stylesheet" href="style.css" crossorigin=""/>
+    </head>
+    <body>
+        <div id="top">
+
+        </div>
+
+    <div id="left">
+        <h1>Locations</h2>
+        <ul id="user-locations-list"></ul>
+
+        <div id="location-details">
+            <h2>Location Details</h2>
+            <p>Select a location to view its details.</p>
+        </div>
+
+        <!-- Trips Table -->
+        <div id="tripslog" class="hidden">
+            <h3>Trips from this location</h3>
+            <table class="starting-trip">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>End</th>
+                        <th>Distance (km)</th>
+                        <th>Flow</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Trip rows will be added dynamically here -->
+
+                </tbody>
+            </table>        
+        
+        </div>    
+    </div>
+    <div id="center">
+        <div id="map"></div>
+    </div>
+    <div id="right">
+        <h1>Trips</h1>
+        <!-- Add Trip Form (Initially Hidden) -->
+        <div id="add-trip-form" style="display: none;">
+            <h3>Add New Trip</h3>
+            <form id="trip-form">
+                <fieldset>
+                    <legend>Trip Details</legend>
+            
+                    <div class="form-group">
+                        <label for="from-location">From:</label>
+                        <select id="from-location" required>
+                            <!-- Locations will be added dynamically here -->
+                        </select>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="to-location">To:</label>
+                        <select id="to-location" required>
+                            <!-- Locations will be added dynamically here -->
+                        </select>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="start-time">Start Time:</label>
+                        <input type="datetime-local" id="start-time" required>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="end-time">End Time:</label>
+                        <input type="datetime-local" id="end-time" required>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="distance">Distance:</label>
+                        <input type="float" id="distance" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="flow">Flow (m³/s):</label>
+                        <input type="number" id="flow" step="0.1" required>
+                    </div>
+            
+                    <div class="form-actions">
+                        <button type="submit">Submit Trip</button>
+                        <button type="button" id="cancel-trip-btn">Cancel</button>
+                    </div>
+                </fieldset>
+            </form>
+            
+        </div>    
+        <button id="add-trip-btn">Add New Trip</button>
+        <table class="trips">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Start</th>
+                    <th>End</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Trip rows will be added dynamically here -->
+                
+            </tbody>        
+        </table>    
+
+        <div id="trip-details">
+            <h2>Trip Details</h2>
+            <p>Select a trip to view its details.</p>
+        </div>    
+    </div>
+
+    <script src="js/script.js" type="module"></script>
+
+
+</body>
+</html>
