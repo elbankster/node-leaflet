@@ -449,8 +449,10 @@ async function populateTripsTable() {
 
         // Add click event to show trip details
         newRow.addEventListener('click', () => {
-            
             showTripDetails(trip);
+            
+            // add function to populate location details and trips from this location when clicked.
+            populateTripsForLocation(trip.start_location?.id);
         });
 
             tripsTable.appendChild(newRow);
@@ -467,23 +469,30 @@ async function showTripDetails(trip) {
     console.log(trip);
 
     const tripDetails = document.getElementById('trip-details');
-    tripDetails.innerHTML = `
-        <h2>Trip Details</h2>
-        
-        <p><strong>Date:</strong> ${trip.started ? new Date(trip.started).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}</p>
-        
-        <p><strong>Start:</strong> ${trip.started ? new Date(trip.started).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
-        <strong>End:</strong> ${trip.ended ? new Date(trip.ended).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : 'N/A'}</p>
-        
-        <p><strong>Distance:</strong> ${trip.distance ? `${trip.distance} km` : 'N/A'}</p>
-        
-        <p><strong>Flow:</strong> ${trip.flow ? `${trip.flow} m³/s` : 'N/A'}</p>
-    `;
-    
+
     // Open the popup for the starting location
     const tripGaugeId = await getGaugeIdFromLocationId(trip.start_location.id);
     const waterway = await getWaterwayFromLocationId(trip.start_location.id);
-    const locationName = await getLocationNameFromLocationId(trip.start_location.id);
+    const startLocation = await getLocationNameFromLocationId(trip.start_location.id);
+    const endLocation = await getLocationNameFromLocationId(trip.end_location.id);   
+
+    tripDetails.innerHTML = `
+        <h2>Trip Details</h2>
+        
+        <div id="trip-data">
+            <p><strong>Date:</strong> ${trip.started ? new Date(trip.started).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}</p>
+            
+            <p><strong>Put in:</strong> ${startLocation}</p> 
+            <p><strong>Time:</strong> ${trip.started ? new Date(trip.started).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+
+            <p><strong>Take out:</strong> ${endLocation}</p> 
+            <strong>End:</strong> ${trip.ended ? new Date(trip.ended).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : 'N/A'}</p>
+            
+            <p><strong>Distance:</strong> ${trip.distance ? `${trip.distance} km` : 'N/A'}</p>
+            
+            <p><strong>Flow:</strong> ${trip.flow ? `${trip.flow} m³/s` : 'N/A'}</p>
+        </div>
+    `;
 
     if (tripGaugeId) {
         // Fetch current conditions for the gauge
@@ -495,7 +504,7 @@ async function showTripDetails(trip) {
             const currentConditions = await getGaugeDetails(tripGaugeId);
 
             let location = {
-                name: locationName,
+                name: startLocation,
                 waterway: waterway
             };
 
@@ -594,6 +603,8 @@ async function getGaugeIdFromLocationId(locationId) {
 }
 
 async function populateTripsForLocation(locationId) {
+    console.log('populating trips from location' + locationId);
+
     try {
         // Query trips starting from the selected location
         const { data, error } = await supabase

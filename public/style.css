@@ -122,3 +122,7 @@ span.flow {
 .flow { text-align: center; }
 
 .smaller { font-size: .8em; }
+
+#trip-data {
+    padding:10px;
+}
