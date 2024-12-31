@@ -503,7 +503,7 @@ async function showTripDetails(trip) {
                 <p>Flow: ${currentConditions.flow || "N/A"} m³/s<br>
                 Level: ${currentConditions.stage || "N/A"} m</p>
                 <p>${currentConditions.currentCondition || "N/A"}</p>
-                <p>${currentConditions.date || "N/A"} ${currentConditions.time || "N/A"}</p>
+                <p style="font-size:0.8em";>Recorded ${currentConditions.date || "N/A"} ${currentConditions.time || "N/A"}</p>
             `;
             markers[trip.start_location.id].bindPopup(popupContent).openPopup();
         }
