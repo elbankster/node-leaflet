@@ -243,6 +243,8 @@ async function loadUserLocations() {
             const marker = L.marker([location.lat, location.lon], { icon: putInIcon, pane: 'userLocationsPane' } )
                 .addTo(user_locations);
 
+            addPopup(marker, location);
+
             const popupContent = `
                 <h2>${location.name}</h2>
                 <h3>${location.waterway}</h3>
