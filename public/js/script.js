@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
+
 var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap'
@@ -80,8 +82,13 @@ async function addPublicLaunches() {
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-const supabaseUrl = 'https://kuuapkkqpvpqekfoicfq.supabase.co';
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1dWFwa2txcHZwcWVrZm9pY2ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUyMzM1MjQsImV4cCI6MjA1MDgwOTUyNH0.pR3vYyDNMVRLlxcY3pWqZleXr65VUSmcB_owfPhfOBo"
+const supabaseUrl = process.env.SUPABASE_API;
+const supabaseKey = process.env.SUPABASE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function addUserLocation(e) {
